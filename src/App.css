@@ -1,38 +1,209 @@
+html,
+.App {
+  overflow: hidden;
+}
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.form-group label {
+  margin: 0 !important;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.form-group {
+  text-align: left;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.form-group input {
+  background-color: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid white !important;
+  border-radius: 0px !important;
+  color: white !important;
+}
+
+.form-group input:focus {
+  box-shadow: 0px 0px 0px !important;
+  border-color: red !important;
+}
+
+form button:active {
+  box-shadow: none !important;
+}
+
+textarea:focus {
+  box-shadow: 0px 0px 10px red !important;
+}
+
+.loginContainer header {
+  font-size: 4rem;
+}
+
+.signUpContainer header {
+  font-size: 2rem;
+}
+
+.leftColumn {
+  z-index: 3;
+}
+
+.leftColumn,
+.rightColumn {
+  width: 50%;
+  max-height: 100%;
+}
+
+.animate {
+  animation: slide 1s 1;
+  animation-fill-mode: forwards;
+}
+
+.animateBack {
+  animation: slideBack 1s 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(0%);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: translateX(-50%);
   }
+}
+
+@keyframes slideBack {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.editProfileContainer button {
+  width: 100%;
+}
+
+.newMessage button {
+  height: 100%;
+  width: 100%;
+}
+.newMessage input {
+  width: 85%;
+}
+.newMessage div {
+  width: 15%;
+}
+
+@media (min-width: 768px) {
+  .paper-plane {
+    position: absolute;
+    top: 5%;
+    left: 0;
+    color: white;
+    font-size: 3rem;
+
+    motion-path: path(
+      "M1528,74 C1528,74 1373,133.857147 1268.50505,133.857143 C1164.0101,133.857138 1044.60849,63.2746747 942.414141,45.2857143 C840.219794,27.2967539 749.351683,18.0222476 595.72201,85.3965342 C442.092336,152.770821 424.504306,178.600216 316.186064,168.137541 C294.677978,156.981816 226.287635,133.857145 219.453224,52.0727741 C212.618812,-29.7115971 316.186058,-10.3505382 284.713623,99.4034497 C253.241188,209.157438 1.06334642,60.6018191 1.06334642,60.6018191"
+    );
+    offset-path: path(
+      "M1528,74 C1528,74 1373,133.857147 1268.50505,133.857143 C1164.0101,133.857138 1044.60849,63.2746747 942.414141,45.2857143 C840.219794,27.2967539 749.351683,18.0222476 595.72201,85.3965342 C442.092336,152.770821 424.504306,178.600216 316.186064,168.137541 C294.677978,156.981816 226.287635,133.857145 219.453224,52.0727741 C212.618812,-29.7115971 316.186058,-10.3505382 284.713623,99.4034497 C253.241188,209.157438 1.06334642,60.6018191 1.06334642,60.6018191"
+    );
+    transform: rotate(200deg);
+    animation: fly 5s ease-out reverse;
+  }
+  .loginContainer header {
+    font-size: 5rem;
+  }
+  .signUpContainer header {
+    font-size: 3rem;
+  }
+
+  .dashboardContainer {
+    width: 100vw !important;
+  }
+  .leftColumn {
+    width: 25% !important;
+  }
+  .rightColumn {
+    width: 75% !important;
+  }
+  .editProfileContainer button {
+    width: 25%;
+  }
+  .newMessage input {
+    width: 90%;
+  }
+  .newMessage div {
+    width: 10%;
+  }
+  .newMessage button {
+    width: auto;
+    height: auto;
+  }
+}
+
+@keyframes fly {
+  100% {
+    motion-offset: 100%;
+    offset-distance: 100%;
+  }
+}
+
+.noStylingButton {
+  background-color: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.topNav .active {
+  background-color: #1e2124 !important;
+}
+
+.topNav .active svg {
+  color: red !important;
+}
+
+.conversationsUsers::-webkit-scrollbar,
+.messages::-webkit-scrollbar {
+  width: 0.2em;
+}
+
+.messages::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #343a40;
+}
+
+.conversationsUsers::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #1e2124;
+}
+
+.conversationsUsers::-webkit-scrollbar-thumb,
+.messages::-webkit-scrollbar-thumb {
+  background-color: red;
+  outline: 1px solid red;
+}
+
+.editProfileContainer label:hover .profilePhotoOverlay {
+  display: block !important;
+  width: 150px !important;
+  height: 150px !important;
+  border-radius: 50% !important;
+  top: 0 !important;
+  background-color: rgba(255, 0, 0, 0.3) !important;
+  position: absolute !important;
+}
+
+.dropdown-toggle::after {
+  all: initial !important;
+}
+
+.topHeader {
+  box-shadow: 0px 2px 4px red;
+}
+
+.dropdown-menu a:active {
+  background-color: initial !important;
 }
