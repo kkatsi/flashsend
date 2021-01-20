@@ -1,78 +1,67 @@
-import React, { useRef, useState, useEffect } from "react";
-import { Form, Button, Toast, Spinner } from "react-bootstrap";
-import { FaPaperPlane, FaTimes } from "react-icons/fa";
+import React, { useRef, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { BsArrowLeftShort } from "react-icons/bs";
+import { Form, Button, Toast, Spinner } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
+import { FaCheck, FaTimes } from "react-icons/fa";
 
-export default function Login() {
-  const { login, isVerified, currentUser } = useAuth();
+export default function ForgotPassword() {
   const emailRef = useRef();
-  const passRef = useRef();
-  const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [verified, setVerified] = useState(true);
-  const [errorText, setErrorText] = useState("");
-
-  async function handleSubmit(e) {
+  const [errorText, setErrorText] = useState(false);
+  const { resetPassword } = useAuth();
+  const history = useHistory();
+  function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
-    setVerified(true);
-    setError(false);
+    const promises = [];
     setSuccess(false);
+    setError(false);
     setErrorText("");
-
-    login(emailRef.current.value, passRef.current.value)
+    setLoading(true);
+    promises.push(resetPassword(emailRef.current.value));
+    Promise.all(promises)
       .then(() => {
         setSuccess(true);
       })
       .catch((error) => {
         setError(true);
         setErrorText(error.message);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 2500);
       });
   }
-
-  useEffect(() => {
-    if (success) {
-      setVerified(isVerified);
-
-      if (isVerified) setLoading(false);
-    }
-    // return () => {
-    //   cleanup;
-    // };
-  }, [success]);
   return (
-    <div className="loginContainer min-vh-100 d-flex align-items-center justify-content-center flex-column">
-      <FaPaperPlane className="paper-plane d-none d-md-block" />
+    <div className="forgotPasswordContainer min-vh-100 d-flex align-items-center justify-content-center flex-column">
+      <Link to="/">
+        <BsArrowLeftShort
+          style={{
+            position: "absolute",
+            fontSize: "3em",
+            top: "5%",
+            left: "5%",
+            color: "white",
+          }}
+        />
+      </Link>
       <header
         style={{
           color: "white",
           fontWeight: "bold",
-          textShadow: "6px 6px 2px red",
+          textShadow: "3px 3px 2px red",
         }}
       >
-        FlashSend
+        Password Reset
       </header>
       <content className="container d-flex justify-content-center p-4">
         <Form onSubmit={handleSubmit} className="col-md-6">
           <Form.Group>
             <Form.Label>Email</Form.Label>
             <Form.Control ref={emailRef} type="email" required></Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Password</Form.Label>
-            <Form.Control ref={passRef} type="password" required></Form.Control>
-            <Form.Text
-              className="text-white text-center"
-              style={{ fontSize: ".9rem" }}
-            >
-              Forgot your password?{" "}
-              <Link to="/reset-password" className="text-danger">
-                Reset
-              </Link>
-            </Form.Text>
           </Form.Group>
           <Button
             type="submit"
@@ -83,14 +72,10 @@ export default function Login() {
               fontSize: "1.2rem",
             }}
           >
-            Login
+            Reset
           </Button>
-
           <small className="text-white" style={{ fontSize: ".9rem" }}>
-            New to FlashSend?{" "}
-            <Link to="/signup" className="text-danger">
-              Create an account
-            </Link>
+            We will send you instructions on how to reset your password!
           </small>
         </Form>
       </content>
@@ -101,14 +86,38 @@ export default function Login() {
           style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: "999" }}
         >
           {/* display spinner as long as waiting for firebase response */}
-          {!error && verified && (
+          {!error && !success && (
             <Spinner animation="border" role="status" variant="danger">
               <span className="sr-only">Loading...</span>
             </Spinner>
           )}
+          {/* display this toast if response is success */}
+          {success && (
+            <Toast
+              style={{ maxWidth: "800px", minWidth: "350px" }}
+              onClose={() => {
+                setLoading(false);
+                history.push("/login");
+              }}
+            >
+              <Toast.Header className="d-flex justify-content-end"></Toast.Header>
+              <Toast.Body className="d-flex flex-column justify-content-center align-items-center">
+                <FaCheck
+                  style={{
+                    color: "green",
+                    fontSize: "2.5rem",
+                    marginBottom: "20px",
+                  }}
+                />
+                <strong>
+                  Visit yor email to follow the instruction on how to reset your
+                  password!
+                </strong>
+              </Toast.Body>
+            </Toast>
+          )}
           {/* display this toast if request fails */}
-
-          {(error || !verified) && (
+          {error && (
             <Toast onClose={() => setLoading(false)}>
               <Toast.Header className="d-flex justify-content-end"></Toast.Header>
               <Toast.Body className="d-flex flex-column justify-content-center align-items-center">
@@ -120,11 +129,7 @@ export default function Login() {
                   }}
                 />
 
-                <strong>
-                  {error
-                    ? errorText
-                    : "You must verify your email before logging in! Instructions are included in the email we sent you with your signup!"}
-                </strong>
+                <strong>{errorText}</strong>
               </Toast.Body>
             </Toast>
           )}

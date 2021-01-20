@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosSettings, IoIosArrowBack } from "react-icons/io";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { AiOutlinePlus } from "react-icons/ai";
-import { Dropdown, Form } from "react-bootstrap";
+import { Dropdown, Form, Toast } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 
 export default function ConversationLayout() {
+  const [show, setShow] = useState(false);
   const data = [
     {
       name: "Giannis",
@@ -21,18 +22,19 @@ export default function ConversationLayout() {
     },
   ];
   useEffect(() => {
-    if (window.innerWidth > 768)
+    if (window.innerWidth > 768) {
       document.querySelector(".messages").style.height =
         window.innerHeight - 94 - 76 + "px";
-    else
+      window.addEventListener(
+        "resize",
+        () =>
+          (document.querySelector(".messages").style.height =
+            window.innerHeight - 94 - 76 + "px")
+      );
+    } else
       document.querySelector(".messages").style.height =
         window.innerHeight - 102 - 76 + "px";
-    window.addEventListener(
-      "resize",
-      () =>
-        (document.querySelector(".messages").style.height =
-          window.innerHeight - 94 - 76 + "px")
-    );
+    return window.removeEventListener("resize", function () {});
   }, []);
   return (
     <div className="basicLayoutContainer w-100">
@@ -99,7 +101,8 @@ export default function ConversationLayout() {
               </Dropdown.Item>
               <Dropdown.Item
                 href="#/action-2"
-                className="d-flex align-items-center"
+                className="d-flex align-items-center text-dark"
+                onClick={() => setShow(true)}
               >
                 <AiOutlinePlus
                   style={{ fontSize: "1.4em", marginRight: ".5rem" }}
@@ -164,6 +167,41 @@ export default function ConversationLayout() {
           </div>
         </Form>
       </div>
+      <Toast
+        onClose={() => setShow(false)}
+        show={show}
+        style={{
+          position: "absolute",
+          bottom: "0",
+          left: "0",
+          right: "0",
+          top: "0",
+          height: "250px",
+          margin: "auto auto",
+        }}
+      >
+        <Toast.Header>
+          <strong className="mr-auto">Add person</strong>
+        </Toast.Header>
+        <Toast.Body style={{ height: "220px" }}>
+          <div
+            className="addFriendToConversationContainer d-flex flex-column h-100"
+            style={{ overflow: "auto" }}
+          >
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+            <span>test</span>
+          </div>
+        </Toast.Body>
+      </Toast>
     </div>
   );
 }

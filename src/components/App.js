@@ -5,15 +5,16 @@ import Signup from "./Signup.js";
 import Home from "./Home";
 import EditProfile from "./EditProfile";
 import PrivateRoute from "./PrivateRoute";
+import ForgotPassword from "./ForgotPassword";
 
 function App() {
   return (
     <div className="App bg-dark">
       <Switch>
         <PrivateRoute exact path="/login" component={Login} />
-        {/* <Route path="/app" component={HomeContent} /> */}
-        <Route exact path="/signup" component={Signup} />
-        <Route exact path="/edit-profile" component={EditProfile} />
+        <PrivateRoute exact path="/signup" component={Signup} />
+        <PrivateRoute exact path="/edit-profile" component={EditProfile} />
+        <PrivateRoute exact path="/reset-password" component={ForgotPassword} />
         <PrivateRoute path="/" component={Home} />
       </Switch>
     </div>

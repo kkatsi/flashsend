@@ -5,11 +5,17 @@ import App from "./components/App";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { FirestoreBeforeLoginProvider } from "./contexts/FirestoreBeforeLoginContext";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <App />
+      <AuthProvider>
+        <FirestoreBeforeLoginProvider>
+          <App />
+        </FirestoreBeforeLoginProvider>
+      </AuthProvider>
     </Router>
   </React.StrictMode>,
   document.getElementById("root")

@@ -37,6 +37,9 @@ export default function Contacts() {
             active="false"
             className="user d-flex px-3 text-light w-100 align-items-center"
             style={{ cursor: "pointer" }}
+            // onClick={() =>
+            //   document.querySelector(".topNav").children[0].children[0].click()
+            // }
           >
             <img
               alt="portrait"
