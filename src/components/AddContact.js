@@ -1,6 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Form, Nav, Toast } from "react-bootstrap";
-import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
+import {
+  AiOutlineSearch,
+  AiOutlinePlus,
+  AiOutlineUserAdd,
+} from "react-icons/ai";
 import { BsCheck } from "react-icons/bs";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
@@ -19,12 +23,18 @@ export default function AddContact() {
     friendRequests,
     acceptFriendRequest,
     denyFriendRequest,
+    getContacts,
   } = useFirestoreAfterLogin();
 
   function handleSearch() {
     if (searchRef.current.value.length >= 3)
       setUsers(getUsers(searchRef.current.value));
     else setUsers([]);
+  }
+
+  function handleClick(user) {
+    sendFriendRequest(user);
+    setShow(true);
   }
 
   return (
@@ -117,8 +127,11 @@ export default function AddContact() {
                   className="user d-flex px-3 text-light w-100 align-items-center"
                   style={{ cursor: "pointer" }}
                   onClick={() => {
-                    sendFriendRequest(user);
-                    setShow(true);
+                    return getContacts.filter(
+                      (contact) => contact.uid === user.uid
+                    ).length > 0
+                      ? ""
+                      : handleClick(user);
                   }}
                 >
                   <img
@@ -133,7 +146,19 @@ export default function AddContact() {
                   ></img>
                   <div className="text-left ml-3 d-flex justify-content-between align-items-center w-100">
                     <span>{user.displayName}</span>
-                    <AiOutlinePlus style={{ color: "white" }} />
+                    {getContacts.filter((contact) => contact.uid === user.uid)
+                      .length > 0 ? (
+                      <div className="text-right">
+                        <FaCheck
+                          style={{ fontSize: "1.2em", color: "green" }}
+                        />
+                        <AiOutlineUserAdd
+                          style={{ fontSize: "1.4em", color: "green" }}
+                        />
+                      </div>
+                    ) : (
+                      <AiOutlinePlus style={{ color: "white" }} />
+                    )}
                   </div>
                 </Nav.Link>
               );

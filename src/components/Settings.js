@@ -10,7 +10,7 @@ export default function Settings() {
   async function handleLogout() {
     try {
       await logout();
-      history.push("/login");
+      window.location.href = "/";
     } catch {
       console.log("error");
     }

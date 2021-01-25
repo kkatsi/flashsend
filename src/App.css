@@ -223,3 +223,7 @@ textarea:focus {
 button.close {
   text-align: right;
 }
+
+.dropdown-item.active {
+  background-color: rgba(0, 0, 0, 0) !important;
+}

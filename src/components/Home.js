@@ -3,13 +3,12 @@ import RightColumn from "./RightColumn";
 import LeftColumn from "./LeftColumn";
 import { useAuth } from "../contexts/AuthContext";
 import { FirestoreAfterLoginProvider } from "../contexts/FirestoreAfterLoginContext";
-import { useFirestoreAfterLogin } from "../contexts/FirestoreAfterLoginContext";
+import { firebaseRT } from "../firebase";
+import firebase from "firebase";
 
 export default function Home() {
-  // const { allContacts } = useFirestoreAfterLogin();
-  // useEffect(() => {
-  //   console.log(allContacts);
-  // }, []);
+  const { currentUser } = useAuth();
+
   return (
     <FirestoreAfterLoginProvider>
       <div
