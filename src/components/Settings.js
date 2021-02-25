@@ -10,6 +10,7 @@ export default function Settings() {
   async function handleLogout() {
     try {
       await logout();
+      localStorage.clear();
       window.location.href = "/";
     } catch {
       console.log("error");

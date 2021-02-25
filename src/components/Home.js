@@ -11,12 +11,9 @@ export default function Home() {
 
   return (
     <FirestoreAfterLoginProvider>
-      <div
-        className="dashboardContainer d-flex"
-        style={{ width: "200vw", overflow: "hidden" }}
-      >
-        <LeftColumn />
-        <RightColumn />
+      <div className="dashboardContainer d-flex" style={{ maxHeigth: "100vh" }}>
+        <LeftColumn style={{ maxHeight: "100vh" }} />
+        <RightColumn style={{ maxHeight: "100vh" }} />
       </div>
     </FirestoreAfterLoginProvider>
   );

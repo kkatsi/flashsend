@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { firebaseDB } from "../firebase";
 import { useAuth } from "./AuthContext";
+import firebase from "firebase";
 
 const FirestoreAfterLoginContext = React.createContext();
 
@@ -13,8 +14,13 @@ export function FirestoreAfterLoginProvider({ children }) {
   const [allContacts, setAllContacts] = useState([]);
   const [usersStatus, setUsersStatus] = useState([]);
   const [contactsStatus, setContactsStatus] = useState([]);
+  const [tempContactsStatus, setTempContactsStatus] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [getContacts, setGetContacts] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [allMessages, setAllMessages] = useState([]);
+  const [allConversations, setAllConversations] = useState([]);
+  const [allMessagesLength, setAllMessagesLength] = useState();
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
 
@@ -59,6 +65,27 @@ export function FirestoreAfterLoginProvider({ children }) {
           contacts.filter((contact) => contact.accepted === false)
         );
         setGetContacts(
+          contacts.filter((contact) => contact.accepted !== false)
+        );
+        setLoading(false);
+      });
+  }
+
+  function getAllConversations() {
+    setLoading(true);
+    firebaseDB
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("contacts")
+      .orderBy("time", "desc")
+      .onSnapshot((querySnapshot) => {
+        var contacts = [];
+        querySnapshot.forEach(function (contact) {
+          const tempData = contact.data();
+          tempData.uid = contact.id;
+          contacts.push(tempData);
+        });
+        setAllConversations(
           contacts.filter((contact) => contact.accepted !== false)
         );
         setLoading(false);
@@ -114,25 +141,17 @@ export function FirestoreAfterLoginProvider({ children }) {
   async function sendFriendRequest(user) {
     return await firebaseDB
       .collection("users")
-      .doc(currentUser.uid)
-      .collection("contacts")
       .doc(user.uid)
+      .collection("contacts")
+      .doc(currentUser.uid)
       .set({
-        displayName: user.displayName,
-        accepted: true,
-        photoURL: user.photoURL,
-      })
-      .then(() => {
-        firebaseDB
-          .collection("users")
-          .doc(user.uid)
-          .collection("contacts")
-          .doc(currentUser.uid)
-          .set({
-            displayName: currentUser.displayName,
-            accepted: false,
-            photoURL: currentUser.photoURL,
-          });
+        displayName: currentUser.displayName,
+        accepted: false,
+        photoURL: currentUser.photoURL,
+        hasMessages: false,
+        lastMessage: "",
+        time: null,
+        alert: false,
       });
   }
 
@@ -151,13 +170,37 @@ export function FirestoreAfterLoginProvider({ children }) {
           .doc(user.uid)
           .collection("contacts")
           .doc(currentUser.uid)
-          .update({
+          .set({
+            displayName: currentUser.displayName,
             accepted: true,
+            photoURL: currentUser.photoURL,
+            hasMessages: false,
+            lastMessage: "",
+            time: null,
+            alert: false,
           })
           .then(() => {
-            setFriendRequests(
-              friendRequests.filter((contact) => user.uid !== contact.uid)
-            );
+            firebaseDB
+              .collection("messages")
+              .doc(user.uid)
+              .collection("contacts")
+              .doc(currentUser.uid)
+              .set({ messages: [] })
+              .then(() => {
+                firebaseDB
+                  .collection("messages")
+                  .doc(currentUser.uid)
+                  .collection("contacts")
+                  .doc(user.uid)
+                  .set({ messages: [] })
+                  .then(() => {
+                    setFriendRequests(
+                      friendRequests.filter(
+                        (contact) => user.uid !== contact.uid
+                      )
+                    );
+                  });
+              });
           });
       });
   }
@@ -170,16 +213,113 @@ export function FirestoreAfterLoginProvider({ children }) {
       .doc(user.uid)
       .delete()
       .then(() => {
+        setFriendRequests(
+          friendRequests.filter((contact) => user.uid !== contact.uid)
+        );
+      });
+  }
+
+  async function setHasMessages(user) {
+    return await firebaseDB
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("contacts")
+      .doc(user.uid)
+      .update({ hasMessages: true })
+      .then(() => {
         firebaseDB
           .collection("users")
           .doc(user.uid)
           .collection("contacts")
           .doc(currentUser.uid)
-          .delete()
-          .then(() => {
-            setFriendRequests(
-              friendRequests.filter((contact) => user.uid !== contact.uid)
-            );
+          .update({
+            hasMessages: true,
+          });
+      });
+  }
+
+  async function setLastMessage(user, msg) {
+    console.log(msg);
+    return await firebaseDB
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("contacts")
+      .doc(user.uid)
+      .update({
+        lastMessage: `You: ${msg}`,
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+        alert: false,
+      })
+      .then(() => {
+        firebaseDB
+          .collection("users")
+          .doc(user.uid)
+          .collection("contacts")
+          .doc(currentUser.uid)
+          .update({
+            lastMessage: `${currentUser.displayName.substr(
+              0,
+              currentUser.displayName.indexOf(" ")
+            )}: ${msg}`,
+            time: firebase.firestore.FieldValue.serverTimestamp(),
+            alert: true,
+          });
+      });
+  }
+
+  async function getAllMessages(user) {
+    return await firebaseDB
+      .collection("messages")
+      .doc(currentUser.uid)
+      .collection("contacts")
+      .doc(user.uid)
+      .collection("messages")
+      .orderBy("time", "desc")
+      .onSnapshot(function (querySnapshot) {
+        var mes = [];
+        querySnapshot.forEach(function (doc) {
+          mes.push(doc.data());
+        });
+        setAllMessagesLength(mes.length);
+        setAllMessages(mes);
+        setMessages(mes.filter((message, index) => index < 20));
+      });
+  }
+
+  function getMessages(from, mes) {
+    setMessages((prevMessages) => {
+      return [
+        ...prevMessages,
+        ...mes.filter((message, index) => index >= from && index < from + 20),
+      ];
+    });
+  }
+
+  async function sendMessage(msg, user) {
+    return await firebaseDB
+      .collection("messages")
+      .doc(currentUser.uid)
+      .collection("contacts")
+      .doc(user.uid)
+      .collection("messages")
+      .doc()
+      .set({
+        message: msg,
+        user: currentUser.displayName,
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+      })
+      .then(() => {
+        firebaseDB
+          .collection("messages")
+          .doc(user.uid)
+          .collection("contacts")
+          .doc(currentUser.uid)
+          .collection("messages")
+          .doc()
+          .set({
+            message: msg,
+            user: currentUser.displayName,
+            time: firebase.firestore.FieldValue.serverTimestamp(),
           });
       });
   }
@@ -188,7 +328,8 @@ export function FirestoreAfterLoginProvider({ children }) {
     const unsubUsers = getAllUsers();
     const unsubContacts = getAllContacts();
     const unsubStatus = statusChange();
-    return [unsubUsers, unsubContacts, unsubStatus];
+    const unsubConversations = getAllConversations();
+    return [unsubUsers, unsubContacts, unsubStatus, unsubConversations];
   }, []);
 
   useEffect(() => {
@@ -199,17 +340,18 @@ export function FirestoreAfterLoginProvider({ children }) {
 
   useEffect(() => {
     setContactsStatus([]);
+    setTempContactsStatus([]);
     getContacts.forEach((contact) => {
-      setContactsStatus((prevContactsStatus) => [
-        ...prevContactsStatus,
+      setTempContactsStatus((prevTempContactsStatus) => [
+        ...prevTempContactsStatus,
         ...usersStatus.filter((userstatus) => userstatus.uid === contact.uid),
       ]);
     });
   }, [usersStatus, getContacts]);
 
   useEffect(() => {
-    console.log(contactsStatus);
-  }, [contactsStatus]);
+    setContactsStatus(tempContactsStatus);
+  }, [tempContactsStatus]);
 
   const value = {
     getUsers,
@@ -221,6 +363,15 @@ export function FirestoreAfterLoginProvider({ children }) {
     deleteContact,
     acceptFriendRequest,
     denyFriendRequest,
+    sendMessage,
+    messages,
+    getMessages,
+    getAllMessages,
+    allMessages,
+    allMessagesLength,
+    setHasMessages,
+    setLastMessage,
+    allConversations,
   };
   return (
     <FirestoreAfterLoginContext.Provider value={value}>

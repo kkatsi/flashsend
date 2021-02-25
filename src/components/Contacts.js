@@ -50,11 +50,14 @@ export default function Contacts() {
         </Form>
       </div>
       <div className="resultsContainer text-light d-flex flex-column">
-        <span className="lead">Contacts</span>
+        {getContacts.length === 0 && (
+          <span className="lead">No contacts yet!</span>
+        )}
+        {getContacts.length > 0 && <span className="lead">Contacts</span>}
 
         <Nav
           className="conversationsUsers d-flex flex-column flex-nowrap mt-3"
-          style={{ overflowY: "auto", overflowX: "hidden" }}
+          style={{ overflowY: "auto", overflowX: "hidden", minHeight: "200px" }}
         >
           {contactsStatus.length === getContacts.length &&
             getContacts.map((contact, index) => {
@@ -66,6 +69,15 @@ export default function Contacts() {
                     active="false"
                     className="user d-flex text-light px-0 w-100 align-items-center text"
                     style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      if (
+                        window.innerWidth < 768 ||
+                        window.screen.width < 768
+                      ) {
+                        document.querySelector(".rightColumn").style.zIndex =
+                          "99";
+                      }
+                    }}
                   >
                     <img
                       alt="portrait"
@@ -114,9 +126,10 @@ export default function Contacts() {
                         />
                       </Dropdown.Toggle>
 
-                      <Dropdown.Menu>
+                      <Dropdown.Menu style={{ zIndex: "99" }}>
                         <Dropdown.Item
-                          href="#/action-1"
+                          to="/"
+                          as={NavLink}
                           className="d-flex align-items-center text-danger"
                           onClick={(event) => {
                             handleClick(event, contact);
@@ -139,7 +152,7 @@ export default function Contacts() {
         onClose={() => setShow(false)}
         show={show}
         style={{
-          position: "absolute",
+          position: "fixed",
           bottom: "0",
           left: "0",
           right: "0",
